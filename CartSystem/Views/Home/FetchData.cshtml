@@ -1,0 +1,45 @@
+﻿@model IEnumerable<CartSystem.Models.ProductModels>
+
+@{
+    ViewData["Title"] = "FetchData";
+}
+
+<div class="h2 text-center bg-primary text-white py-3 my-3 rounded shadow">
+    Show Products
+</div>
+
+
+<div class="row mt-4">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-4">
+            <div class="card">
+                <img src="~/ProductImages/@item.Image" width="200px" height="200px" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">@item.ProductName</h5>
+                    <p class="card-text" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">@item.Description</p>
+                    <p class="card-text">
+                        @if (item.Quantity == 0)
+                        {
+                            @if (TempData["Qty"] != null)
+                            {
+                                <span>Quantity: @item.Quantity</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Product Out of Stock!</span>
+                            }
+                        }
+                        else
+                        {
+                            <span>Quantity: @item.Quantity</span>
+                        }
+                    </p>
+                    <a href="@Url.Action("AddToCart", "Cart", new {
+                        productId = item.Id
+                    })" class="btn btn-primary">Add to Cart</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

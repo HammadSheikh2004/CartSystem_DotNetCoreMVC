@@ -1,0 +1,84 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<table class="table">
+    <th>Product Name</th>
+    <th>Image</th>
+    <th>Quantity</th>
+    <th>Price</th>
+
+
+    @if (HttpContextAccessor.HttpContext!.Session.Get<List<CartItems>>("Cart") != null)
+    {
+        <tbody>
+            @foreach (var item in HttpContextAccessor.HttpContext.Session.Get<List<CartItems>>("Cart"))
+            {
+                <tr>
+                    <td>@item.Product!.ProductName</td>
+                    <td><img src="~/ProductImages/@item.Product.Image" width="50px" height="50px" /></td>
+
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="updateCartQty('@item.Product.Id', 'decrease')">-</button>
+                        @item.Qty
+                        <button class="btn btn-primary btn-sm" onclick="updateCartQty('@item.Product.Id', 'increase')">+</button>
+                    </td>
+
+                    <td>@item.Product.Price</td>
+                </tr>
+            }
+            <tr>
+                <td colspan="3">Total Amount:</td>
+                <td id="totalAmount">
+                    @{
+                        List<CartItems> cartItems = HttpContextAccessor.HttpContext.Session.Get<List<CartItems>>("Cart");
+                        var total = (from data in cartItems select data.Product!.Price * data.Qty).Sum();
+                    }
+                    @total
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <a href="@Url.Action("CheckOut", "Cart")"> Checkout </a>
+                </td>
+            </tr>
+        </tbody>
+    }
+    else
+    {
+        <tr class="text-white w-100 bg-warning p-4 mt-4 rounded text-center">
+            <td colspan="4">Cart is Empty</td>
+        </tr>
+    }
+
+
+
+
+</table>
+@if (TempData["CartMessage"] != null)
+{
+    <script>
+        alert('@TempData["CartMessage"]');
+    </script>
+}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    function updateCartQty(productId, action) {
+        $.ajax({
+            url: '@Url.Action("UpdateCartQty", "Cart")',
+            type: 'POST',
+            data: {
+                productId: productId,
+                action: action
+            },
+            success: function (response) {
+                $('#totalAmount').html(response.totalAmount);
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    }
+</script>
+
